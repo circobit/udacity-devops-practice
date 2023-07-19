@@ -1,7 +1,7 @@
 # Exercise: Least Privilege Security Groups
 A client of yours has asked you to review their security group configuration for one of their projects. He's concerned about the firewall rules not following best practices, in particular the least privilege principle. He has sent you this CloudFormation template snippet:
 
-`Resources:
+```Resources:
   VPC: 
     Type: AWS::EC2::VPC
     Properties:
@@ -39,7 +39,7 @@ A client of yours has asked you to review their security group configuration for
       - IpProtocol: tcp
         FromPort: 80
         ToPort: 80
-        CidrIp: 0.0.0.0/0`
+        CidrIp: 0.0.0.0/0```
 
 There are three groups of servers: bastions or SSH jump boxes, servers hosting Application A, and servers hosting Application B. Each security group is attached to the servers based on its name.
 

@@ -1,0 +1,54 @@
+Description: >
+    udacity-devops-practice
+    There are three groups of servers: bastions or SSH jump boxes, 
+    servers hosting Application A, and servers hosting Application B.
+
+Parameters:
+
+    ExerciseName:
+        Type: String
+        Description: Tag name for our resources
+        Default: udacity-lt-asg-exercise
+
+Resources:
+
+    ApplicationASecurityGroup:
+        Type: AWS::EC2::SecurityGroup
+        Properties:
+          VpcId:
+              Fn::ImportValue:
+                  !Sub ${ExerciseName}-vpc-id
+          GroupDescription: Security group for WebApp servers
+          SecurityGroupIngress:
+              - IpProtocol: tcp
+                FromPort: 3000
+                ToPort: 3000
+                CidrIp: 10.11.0.0/16
+
+    WebAppLaunchTemplate:
+        Type: AWS::EC2::LaunchTemplate
+        Properties:
+            LaunchTemplateName: !Ref ExerciseName
+            LaunchTemplateData:
+                ImageId: ami-03f65b8614a860c29
+                SecurityGroupIds:
+                    - !Ref ApplicationASecurityGroup
+                InstanceType: t2.micro
+                BlockDeviceMappings:
+                  - DeviceName: "/dev/sdk"
+                    Ebs:
+                      VolumeSize: '10'
+
+    WebAppAutoscalingGroup:
+        Type: AWS::AutoScaling::AutoScalingGroup
+        Properties: 
+            AutoScalingGroupName: !Ref ExerciseName
+            VPCZoneIdentifier: 
+                - Fn::ImportValue:
+                    !Sub ${ExerciseName}-private-subnets
+            LaunchTemplate:
+                LaunchTemplateId: !Ref WebAppLaunchTemplate
+                Version: !GetAtt WebAppLaunchTemplate.LatestVersionNumber
+            MinSize: "1"
+            MaxSize: "6"
+            DesiredCapacity: "1"
