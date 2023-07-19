@@ -1,7 +1,7 @@
 [
     {
         "ParameterKey": "EnvironmentName",
-        "ParameterValue": "my_infra_project"
+        "ParameterValue": "my-infra-project"
     },
     {
         "ParameterKey": "VpcCIDR",

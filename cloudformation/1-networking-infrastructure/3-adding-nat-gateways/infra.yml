@@ -8,6 +8,7 @@ Description: >
 Parameters:
     EnvironmentName:
         Description: Environment name that will be prefixed to resources.
+        AllowedPattern: "[a-zA-Z0-9-]*"
         Type: String
     
     VpcCIDR:
