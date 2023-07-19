@@ -4,8 +4,8 @@ This repo contains some DevOps exercises provided by Udacity.
 
 # How to run the Cloudformation commands
 
-In order to facilitate the Cloudformation deployment/update commands, 
-I added two files:
+In order to facilitate the Cloudformation deployment/update/delete commands, 
+I added files:
 
 - cloudformation/0-helpers/create.sh
 - cloudformation/0-helpers/update.sh

@@ -1,0 +1,67 @@
+Description: >
+    udacity-devops-practice
+    There are three groups of servers: bastions or SSH jump boxes, 
+    servers hosting Application A, and servers hosting Application B.
+
+Parameters:
+    EnvironmentName:
+        Description: Environment name that will be prefixed to resources.
+        AllowedPattern: "[a-zA-Z0-9-]*"
+        Type: String
+    
+    VpcCIDR:
+        Description: The IP range (CIDR notation) for this VPC.
+        Type: String
+        Default: 10.4.0.0/16
+
+Resources:
+
+    VPC: 
+        Type: AWS::EC2::VPC
+        Properties:
+          CidrBlock: !Ref VpcCIDR
+          EnableDnsHostnames: true
+          Tags: 
+              - Key: Name 
+                Value: !Ref EnvironmentName
+
+    BastionsSecurityGroup:
+        Type: AWS::EC2::SecurityGroup
+        Properties:
+          VpcId: !Ref VPC
+          GroupDescription: Security group for Bastion servers
+          SecurityGroupIngress:
+          - IpProtocol: tcp
+            FromPort: 22
+            ToPort: 22
+            CidrIp: 10.156.30.0/24
+
+    ApplicationASecurityGroup:
+        Type: AWS::EC2::SecurityGroup
+        Properties:
+          VpcId: !Ref VPC
+          GroupDescription: Security group for Application A servers
+          SecurityGroupIngress:
+          - IpProtocol: tcp
+            FromPort: 80
+            ToPort: 80
+            CidrIp: 0.0.0.0/0
+          - IpProtocol: tcp
+            FromPort: 22
+            ToPort: 22
+            SourceSecurityGroupId: !Ref BastionsSecurityGroup
+
+    ApplicationBSecurityGroup:
+        Type: AWS::EC2::SecurityGroup
+        Properties:
+          VpcId: !Ref VPC
+          GroupDescription: Security group for Application B servers
+          SecurityGroupIngress:
+          - IpProtocol: tcp
+            FromPort: 80
+            ToPort: 80
+            CidrIp: 10.156.36.0/24
+          - IpProtocol: tcp
+            FromPort: 22
+            ToPort: 22
+            SourceSecurityGroupId: !Ref BastionsSecurityGroup
