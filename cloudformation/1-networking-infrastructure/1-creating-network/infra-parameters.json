@@ -1,0 +1,10 @@
+[
+    {
+        "ParameterKey": "EnvironmentName",
+        "ParameterValue": "my_infra_project"
+    },
+    {
+        "ParameterKey": "VpcCIDR",
+        "ParameterValue": "10.2.0.0/16"
+    }
+]
