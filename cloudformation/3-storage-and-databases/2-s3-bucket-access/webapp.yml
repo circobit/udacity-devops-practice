@@ -1,7 +1,8 @@
 Description: >
     udacity-devops-practice
-    There are three groups of servers: bastions or SSH jump boxes, 
-    servers hosting Application A, and servers hosting Application B.
+    In this exercise, you will adjust the provided CloudFormation 
+    template to grant access to an S3 bucket from a group of EC2 servers. 
+    Of course, you will need to create the bucket itself.
 
 Parameters:
 

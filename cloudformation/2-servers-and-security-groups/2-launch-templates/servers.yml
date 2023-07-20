@@ -1,6 +1,7 @@
 Description: >
     udacity-devops-practice
-    This stack contains a security group, a 
+    This stack contains a security group, a Launch template
+    and an Autoscaling Group.
 
 Parameters:
 

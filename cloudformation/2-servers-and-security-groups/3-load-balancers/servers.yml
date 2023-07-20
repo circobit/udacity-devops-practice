@@ -1,7 +1,10 @@
 Description: >
     udacity-devops-practice
-    There are three groups of servers: bastions or SSH jump boxes, 
-    servers hosting Application A, and servers hosting Application B.
+    This template contains an Autoscaling Group with its corresponding 
+    Launch Configuration template. Also it includes a Load Balancer with
+    the corresponding Target Group, Listener and Listener Rule.
+    Two required Security Groups are included: one for the instances
+    and other one for the Load Balancer.
 
 Parameters:
 
