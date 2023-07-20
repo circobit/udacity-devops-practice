@@ -1,0 +1,87 @@
+Description: >
+    udacity-devops-practice
+    MySQL database for the MyWebApp application.
+
+Parameters:
+
+    ExerciseName:
+        Type: String
+        Description: Tag name for our resources
+        Default: udacity-database-exercise
+    
+    WebAppDBName:
+        Type: String
+        Description: Tag name for our resources
+        Default: WebApp
+
+    RdsMasterUsername:
+        Type: String
+        Description: Username for the RDS database
+
+    RdsMasterPassword:
+        Type: String
+        Description: Password for the RDS database
+
+Resources:
+
+    WebAppSecurityGroup:
+        Type: AWS::EC2::SecurityGroup
+        Properties:
+          VpcId:
+              Fn::ImportValue:
+                  !Sub ${ExerciseName}-vpc-id
+          GroupDescription: Security group for WebApp database
+          SecurityGroupIngress:
+              - IpProtocol: tcp
+                FromPort: 3306
+                ToPort: 3306
+                CidrIp: 10.10.0.0/24
+
+    WebAppDBSubnetGroup:
+        Type: AWS::RDS::DBSubnetGroup
+        Properties:
+            DBSubnetGroupDescription: Subnet group for WebApp database
+            DBSubnetGroupName: !Ref ExerciseName
+            SubnetIds: !Split
+              - ","
+              - Fn::ImportValue: !Sub ${ExerciseName}-private-subnets
+            Tags:
+                - Key: Name
+                  Value: !Ref ExerciseName
+
+    WebAppDBParameterGroup:
+        Type: AWS::RDS::DBParameterGroup
+        Properties:
+          DBParameterGroupName: !Ref ExerciseName
+          Description: Parameter group for RDS
+          Family: mysql8.0
+          Parameters:
+              innodb_buffer_pool_instances: 1
+              innodb_buffer_pool_size: 134217728
+              max_connections: 1000
+          Tags:
+              - Key: Name
+                Value: !Ref ExerciseName
+
+    WebAppDB:
+        Type: AWS::RDS::DBInstance
+        DeletionPolicy: Snapshot
+        Properties: 
+            AllocatedStorage: '20'
+            VPCSecurityGroups:
+                - !Ref WebAppSecurityGroup
+            AllowMajorVersionUpgrade: false
+            AutoMinorVersionUpgrade: true
+            DBName: !Ref WebAppDBName
+            DBParameterGroupName: !Ref WebAppDBParameterGroup
+            DBSubnetGroupName: !Ref WebAppDBSubnetGroup
+            DeletionProtection: true
+            DBInstanceClass: db.t3.micro
+            DBInstanceIdentifier: !Ref ExerciseName
+            Engine: mysql
+            EngineVersion: "8.0.32"
+            MasterUsername: !Ref RdsMasterUsername
+            MasterUserPassword: !Ref RdsMasterPassword
+            Tags: 
+                - Key: Name
+                  Value: !Ref ExerciseName
