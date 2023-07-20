@@ -1,0 +1,123 @@
+Description: >
+    udacity-devops-practice
+    There are three groups of servers: bastions or SSH jump boxes, 
+    servers hosting Application A, and servers hosting Application B.
+
+Parameters:
+
+    ExerciseName:
+        Type: String
+        Description: Tag name for our resources
+        Default: udacity-lt-asg-exercise
+
+Resources:
+
+    WebAppSecurityGroup:
+        Type: AWS::EC2::SecurityGroup
+        Properties:
+          VpcId:
+              Fn::ImportValue:
+                  !Sub ${ExerciseName}-vpc-id
+          GroupDescription: Security group for WebApp servers
+          SecurityGroupIngress:
+              - IpProtocol: tcp
+                FromPort: 3000
+                ToPort: 3000
+                SourceSecurityGroupId: !Ref LBWebAppSecurityGroup
+
+    WebAppLaunchTemplate:
+        Type: AWS::EC2::LaunchTemplate
+        Properties:
+            LaunchTemplateName: !Ref ExerciseName
+            LaunchTemplateData:
+                ImageId: ami-03f65b8614a860c29
+                SecurityGroupIds:
+                    - !Ref WebAppSecurityGroup
+                InstanceType: t2.micro
+                BlockDeviceMappings:
+                  - DeviceName: "/dev/sdk"
+                    Ebs:
+                      VolumeSize: '10'
+
+    WebAppAutoscalingGroup:
+        Type: AWS::AutoScaling::AutoScalingGroup
+        Properties: 
+            AutoScalingGroupName: !Ref ExerciseName
+            VPCZoneIdentifier: 
+                - Fn::ImportValue:
+                    !Sub ${ExerciseName}-private-subnets
+            LaunchTemplate:
+                LaunchTemplateId: !Ref WebAppLaunchTemplate
+                Version: !GetAtt WebAppLaunchTemplate.LatestVersionNumber
+            MinSize: "1"
+            MaxSize: "6"
+            DesiredCapacity: "1"
+            TargetGroupARNs:
+                - Ref: WebAppTargetGroup
+
+    WebAppApplicationLoadBalancer:
+        Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+        Properties: 
+            Name: LB-WebApp
+            SecurityGroups: 
+                - Ref: LBWebAppSecurityGroup
+            Subnets: 
+                - Fn::ImportValue:
+                    !Sub ${ExerciseName}-public-subnet1
+                - Fn::ImportValue:
+                    !Sub ${ExerciseName}-public-subnet2
+            Tags: 
+                - Key: Name
+                  Value: !Ref ExerciseName
+
+    ALBListenerRule:
+        Type: AWS::ElasticLoadBalancingV2::ListenerRule
+        Properties:
+            Actions:
+                - Type: forward
+                  TargetGroupArn: !Ref WebAppTargetGroup
+            Conditions:
+                - Field: path-pattern
+                  Values: [/]
+            ListenerArn: !Ref WebAppApplicationLBListener
+            Priority: 1
+
+    WebAppTargetGroup:
+        Type: AWS::ElasticLoadBalancingV2::TargetGroup
+        Properties:
+            HealthCheckIntervalSeconds: 10
+            HealthCheckPath: /
+            HealthCheckProtocol: HTTP
+            HealthCheckTimeoutSeconds: 8
+            HealthyThresholdCount: 2
+            Port: 3000
+            Protocol: HTTP
+            UnhealthyThresholdCount: 5
+            VpcId: 
+                Fn::ImportValue:
+                    !Sub ${ExerciseName}-vpc-id
+
+    WebAppApplicationLBListener:
+        Type: AWS::ElasticLoadBalancingV2::Listener
+        Properties:
+            DefaultActions:
+                - Type: forward
+                  TargetGroupArn: 
+                      Ref: WebAppTargetGroup
+            LoadBalancerArn:
+                Ref: WebAppApplicationLoadBalancer
+            Port: '80'
+            Protocol: HTTP
+
+    LBWebAppSecurityGroup:
+        Type: AWS::EC2::SecurityGroup
+        Properties:
+          VpcId:
+              Fn::ImportValue:
+                  !Sub ${ExerciseName}-vpc-id
+          GroupDescription: Security group for WebApp servers
+          SecurityGroupIngress:
+              - IpProtocol: tcp
+                FromPort: 80
+                ToPort: 80
+                CidrIp: 0.0.0.0/0

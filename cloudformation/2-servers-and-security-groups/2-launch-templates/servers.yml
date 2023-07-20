@@ -1,7 +1,6 @@
 Description: >
     udacity-devops-practice
-    There are three groups of servers: bastions or SSH jump boxes, 
-    servers hosting Application A, and servers hosting Application B.
+    This stack contains a security group, a 
 
 Parameters:
 
@@ -12,7 +11,7 @@ Parameters:
 
 Resources:
 
-    ApplicationASecurityGroup:
+    WebAppSecurityGroup:
         Type: AWS::EC2::SecurityGroup
         Properties:
           VpcId:
@@ -38,6 +37,9 @@ Resources:
                   - DeviceName: "/dev/sdk"
                     Ebs:
                       VolumeSize: '10'
+            TagSpecifications: 
+                - Key: Name
+                  Value: !Ref ExerciseName
 
     WebAppAutoscalingGroup:
         Type: AWS::AutoScaling::AutoScalingGroup
@@ -52,3 +54,6 @@ Resources:
             MinSize: "1"
             MaxSize: "6"
             DesiredCapacity: "1"
+            Tags: 
+                - Key: Name
+                  Value: !Ref ExerciseName
