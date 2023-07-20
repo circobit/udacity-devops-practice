@@ -1,0 +1,14 @@
+[
+    {
+        "ParameterKey": "ExerciseName",
+        "ParameterValue": "udacity-webapp"
+    },
+    {
+        "ParameterKey": "RdsMasterUsername",
+        "ParameterValue": "admin"
+    },
+    {
+        "ParameterKey": "RdsMasterPassword",
+        "ParameterValue": "H$4vfFb#$k7Uc%@S7S2K97@Um"
+    }
+]
